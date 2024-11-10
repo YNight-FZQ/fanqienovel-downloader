@@ -123,7 +123,7 @@ class NovelDownloader:
         self._pbar.update(1)  # Update by 1 instead of setting n directly
 
         # For web: Return progress info
-        return DownloadProgress(
+        return self.DownloadProgress(
             current=current,
             total=total,
             percentage=(current / total * 100) if total > 0 else 0,
