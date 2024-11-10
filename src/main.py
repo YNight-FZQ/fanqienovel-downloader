@@ -280,6 +280,7 @@ class NovelDownloader:
                 # Download chapters
                 content = existing_content.copy()  # Start with existing content including metadata
                 with concurrent.futures.ThreadPoolExecutor(max_workers=self.config.xc) as executor:
+                    print("🚀 ~ self.config.xc:", self.config.xc) 
                     future_to_chapter = {
                         executor.submit(
                             self._download_chapter,
@@ -413,6 +414,7 @@ class NovelDownloader:
             return existing_content[title]
 
         self.log_callback(f'下载章节: {title}')
+        print("🚀 ~ title:", title)
         retries = 3
         last_error = None
 
@@ -1250,6 +1252,9 @@ def create_cli():
                     continue
             elif inp2 == '5':
                 config.xc = int(input('请输入下载线程数：'))
+                # 检查xc的值
+                if config.xc > os.cpu_count():
+                    config.xc = os.cpu_count()
             else:
                 print('请正确输入!')
                 continue
