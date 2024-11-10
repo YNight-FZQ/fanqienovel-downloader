@@ -319,12 +319,13 @@
                     currentNovelId = novelId;
                     console.log("正在加载小说ID:", novelId);
 
-                    // 先下载小说
-                    const downloadResponse = await fetch(
-                        `/api/download/${novelId}`
-                    );
-                    const downloadData = await downloadResponse.json();
-                    console.log("下载响应:", downloadData);
+                    // 没有必要，调用/api/chapters接口的时候会获取，所以注释
+                    // 先下载小说 
+                    // const downloadResponse = await fetch(
+                    //     `/api/download/${novelId}`
+                    // );
+                    // const downloadData = await downloadResponse.json();
+                    // console.log("下载响应:", downloadData);
 
                     // 获取章节列表
                     const chaptersResponse = await fetch(
