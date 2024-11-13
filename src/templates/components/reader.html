@@ -331,11 +331,12 @@
                     console.log("正在加载小说ID:", novelId);
 
                     // 先下载小说
-                    const downloadResponse = await fetch(
-                        `/api/download/${novelId}`
-                    );
-                    const downloadData = await downloadResponse.json();
-                    console.log("下载响应:", downloadData);
+                    fetch(`/api/download/${novelId}`)
+                        .then((res) => res.json())
+                        .then((data) => {
+                            console.log("下载响应:", data);
+                        })
+                        .catch((err) => console.log("下载响应失败:", err));
 
                     // 获取章节列表
                     const chaptersResponse = await fetch(
@@ -369,7 +370,7 @@
                             (chapter, index) => `
                     <div class="chapter-item ${
                         index === currentChapterIndex ? "active" : ""
-                    }" 
+                    }"
                          style="cursor: pointer; padding: 5px;">
                         <a href="#" onclick="loadChapter(${index}); return false;">
                             ${chapter.title}
@@ -405,9 +406,9 @@
                 try {
                     console.log("加载章节:", chapter.title);
                     const response = await fetch(
-                        `/api/read/${currentNovelId}/${chapter.id}/${encodeURIComponent(
-                            chapter.title
-                        )}`
+                        `/api/read/${currentNovelId}/${
+                            chapter.id
+                        }/${encodeURIComponent(chapter.title)}`
                     );
                     if (!response.ok) {
                         throw new Error(
