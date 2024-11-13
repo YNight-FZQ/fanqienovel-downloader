@@ -120,6 +120,15 @@ def save_config():
     except Exception as e:
         logger.error(f"Error saving configuration: {str(e)}")
 
+def get_capture_content(chapter_id):
+    """get_capture_content"""
+    logger.info(f"Attempting to read chapter: {chapter_id} ")
+    try:
+        content = downloader._download_chapter_content(chapter_id)
+        return content
+    except Exception as e:
+        logger.error(f"Error get_capture_content: {str(e)}")
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -255,8 +264,8 @@ def add_to_queue(novel_id):
     socketio.emit('queue_update', download_queue.get_status())
     return jsonify({'status': 'success'})
 
-@app.route('/api/read/<novel_id>/<chapter_title>')
-def read_chapter(novel_id, chapter_title):
+@app.route('/api/read/<novel_id>/<chapter_id>/<chapter_title>')
+def read_chapter(novel_id, chapter_id, chapter_title):
     """API endpoint to read a specific chapter of a novel"""
     try:
         logger.info(f"Attempting to read chapter: {chapter_title} from novel: {novel_id}")
@@ -264,7 +273,14 @@ def read_chapter(novel_id, chapter_title):
         # 首先确保小说已下载
         if not os.path.exists(downloader.bookstore_dir):
             logger.error("Bookstore directory does not exist")
+            content = get_capture_content(chapter_id)
+            if content:
+                return jsonify({
+                    'title': chapter_title,
+                    'content': content
+                })
             return jsonify({'error': 'Bookstore directory not found'}), 404
+            
             
         # 查找小说文件
         novel_files = [f for f in os.listdir(downloader.bookstore_dir) 
@@ -281,6 +297,12 @@ def read_chapter(novel_id, chapter_title):
         
         if not novel_file:
             logger.error(f"Novel file not found for ID: {novel_id}")
+            content = get_capture_content(chapter_id)
+            if content:
+                return jsonify({
+                    'title': chapter_title,
+                    'content': content
+                })
             return jsonify({'error': 'Novel not found'}), 404
 
         # 读取小说内容
@@ -294,6 +316,12 @@ def read_chapter(novel_id, chapter_title):
         chapter_content = novel_data.get(chapter_title)
         if not chapter_content:
             logger.error(f"Chapter not found: {chapter_title}")
+            content = get_capture_content(chapter_id)
+            if content:
+                return jsonify({
+                    'title': chapter_title,
+                    'content': content
+                })
             return jsonify({'error': 'Chapter not found'}), 404
 
         logger.info(f"Successfully retrieved chapter content for: {chapter_title}")
@@ -350,13 +378,13 @@ def print_server_info():
 def get_chapters(novel_id):
     """Get chapter list for a novel"""
     try:
-        logger.info(f"Attempting to download novel with ID: {novel_id}")
-        download_status = downloader.download_novel(novel_id)
-        logger.info(f"Download status: {download_status}")
+        # logger.info(f"Attempting to download novel with ID: {novel_id}")
+        # download_status = downloader.download_novel(novel_id)
+        # logger.info(f"Download status: {download_status}")
         
-        if not download_status:
-            logger.error(f"Failed to download novel with ID: {novel_id}")
-            return jsonify({'error': 'Failed to download novel'}), 404
+        # if not download_status:
+        #     logger.error(f"Failed to download novel with ID: {novel_id}")
+        #     return jsonify({'error': 'Failed to download novel'}), 404
 
         name, chapters, status = downloader._get_chapter_list(novel_id)
         logger.info(f"Got chapter list: {len(chapters)} chapters")
