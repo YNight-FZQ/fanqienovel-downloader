@@ -29,7 +29,7 @@
             body {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                     Roboto, Arial, sans-serif;
-                line-height: 1.8;
+                line-height: 1.5;
                 color: var(--text-color);
                 background-color: var(--bg-color);
                 transition: all 0.3s ease;
@@ -57,7 +57,7 @@
             }
 
             .chapter-list {
-                max-height: 600px;
+                max-height: 385px;
                 overflow-y: auto;
                 background-color: var(--card-bg);
                 border-radius: 5px;
@@ -85,6 +85,9 @@
                 text-decoration: none;
                 color: inherit;
                 display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 width: 100%;
                 height: 100%;
             }
@@ -213,7 +216,8 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="fontSize" class="form-label"
-                                    >字体大小</label
+                                    >字体大小:
+                                    <span id="fontSizeValue">16px</span></label
                                 >
                                 <input
                                     type="range"
@@ -222,17 +226,23 @@
                                     min="12"
                                     max="32"
                                     value="16" />
-                                <span id="fontSizeValue">16px</span>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <label
+                                    class="form-check-label"
+                                    for="themeSwitch"
+                                    >暗色模式</label
+                                >
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="themeSwitch" />
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">暗色模式</label>
-                                <label class="theme-switch">
-                                    <input type="checkbox" id="themeSwitch" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="mb-3">
-                                <button onclick="window.location.href='/'">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    onclick="window.location.href='/'">
                                     返回首页
                                 </button>
                             </div>
@@ -246,7 +256,8 @@
         <script>
             let currentNovelId = null;
             let chapters = [];
-            let currentChapterIndex = 0;
+            let currentChapterIndex = getLastIndex();
+            let chapterListEl = document.getElementById("chapterList");
 
             // 显示加载指示器
             function showLoading() {
@@ -320,7 +331,7 @@
                     console.log("正在加载小说ID:", novelId);
 
                     // 没有必要，调用/api/chapters接口的时候会获取，所以注释
-                    // 先下载小说 
+                    // 先下载小说
                     // const downloadResponse = await fetch(
                     //     `/api/download/${novelId}`
                     // );
@@ -369,12 +380,11 @@
                         )
                         .join("");
 
-                    document.getElementById("chapterList").innerHTML =
-                        chapterListHtml;
+                    chapterListEl.innerHTML = chapterListHtml;
 
                     // 加载第一章
                     // await loadChapter(0);
-                    await loadChapter(getLastIndex());
+                    await loadChapter(currentChapterIndex);
                 } catch (error) {
                     console.error("初始化阅读器失败:", error);
                     showError(`初始化阅读器失败: ${error.message}`);
@@ -387,6 +397,7 @@
             async function loadChapter(index) {
                 if (index < 0 || index >= chapters.length) return;
                 setLastIndex(index);
+                chapterListEl.scrollTop = (index - 5) * 35;
 
                 showLoading();
                 currentChapterIndex = index;
